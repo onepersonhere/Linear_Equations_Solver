@@ -5,7 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Row {
-    private List<Integer> columnSwaps = new ArrayList<>();
+    private List<int[]> columnSwaps = new ArrayList<>();
+    private int numofrows = Matrix.numofrows;
+    private int numofcolumns = Matrix.numofcolumns;
+    private double[][] matrix = Matrix.matrix;
     public Row(){
         //a list to hold all column swaps
     }
@@ -42,39 +45,73 @@ public class Row {
         for(int a = i + 1; a < matrix.length; a++) {
             double[] nextrow = matrix[a];
             //System.out.println(Arrays.toString(nextrow));
-            if (row[i] != nextrow[i]) {
-                double[] temprow = new double[row.length];
-                double coeff = -nextrow[i];
-                for (int n = 0; n < row.length; n++) {
-                    temprow[n] = row[n] * coeff;
-                }
-                for (int n = 0; n < row.length; n++) {
-                    nextrow[n] += temprow[n];
-                }
-                matrix[a] = nextrow;
-                System.out.println(coeff + " * R" + (i + 1) + " + R" + (a+1) + " -> R" + (a+1));
+            double[] temprow = new double[row.length];
+            double coeff = -nextrow[i];
+            for (int n = 0; n < row.length; n++) {
+                temprow[n] = row[n] * coeff;
             }
+            for (int n = 0; n < row.length; n++) {
+                nextrow[n] += temprow[n];
+            }
+            matrix[a] = nextrow;
+            System.out.println(coeff + " * R" + (i + 1) + " + R" + (a+1) + " -> R" + (a+1));
+
         }
         return matrix;
     }
     private double[][] checkCoefficient(double[][] matrix, int i){
-        //row 0, elem 0 != 0 else swap
-        //row 1, elem 1 != 0
+        double[] row = matrix[i];
+        boolean triedcolumn = false;
+        boolean triedrow = false;
+        boolean alltried = false;
+        //row i, elem i != 0 else swap
+        if(matrix[i][i] == 0){
+            int x = i;
+            for(; x < numofrows; x++){
+                if(matrix[x][i] != 0){
+                    break;
+                }
+            }
+            //swap
+            if(x != numofrows) {
+                matrix[i] = matrix[x];
+                matrix[x] = row;
+                System.out.println("R" + (i + 1) + " <-> R" + (x + 1));
+            }else{
+                triedrow = true;
+            }
+        }
         //if down row, all = 0, swap with next right column (entire column is swapped)
+        if(triedrow){
+            double[][] tempmatrix = matrix;
+            int x = i;
+            for(; x < numofcolumns - 1; x++){
+                if(matrix[i][x] != 0){
+                    break;
+                }
+            }
+            //swap the entire column
+            if(x != numofcolumns - 1) {
+                for(int a = 0; a < numofrows; a++) {
+                    matrix[a][i] = matrix[a][x];
+                    matrix[a][x] = tempmatrix[a][i];
+                }
+                columnSwaps.add(new int[]{i,x});
+                System.out.println("C" + (i + 1) + " <-> C" + (x + 1));
+            }else{
+                triedcolumn = true;
+            }
+        }
         //if down row 0, right column = 0, find first non-zero elem in bottom, swap
+        if(triedcolumn){
+
+        }
+
         //column swaps must swap back in the end
-        //if no such element, end first part of algo
-        //check if no solutions
-        //amount of variables & amt of equations don't need to be equal
-        //significant eqns = non zero rows in linear system
-        //significant vars = number of all columns in the linear system
-        //determine if the linear system has an infinite amount of solutions or a single.
-        //variants:
-        //number of significant equations = the number of significant variables.
-        //number of significant equations < the number of significant variables.
-        //(infinite number of solutions.)
-        //here can't be a case in which the number of significant equations is greater than the number of significant variables
-        //because in this case there would be a contradiction
-        //we've handled in the previous steps of the algorithm.
+        //if no such element, end first part of algo -> Matrix.checkSolutions();
+        //proceed if returned ""
+
+        return matrix;
     }
+
 }

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -27,12 +28,15 @@ public class Main {
             File myObj = new File(filename);
             Scanner myReader = new Scanner(myObj);
             int numofrows = 0;
+            int numofcolumns = 0;
             List<List<Double>> list = new ArrayList<>();
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 String[] Data = data.split(" ");
-                if(Data.length == 1){
-                    numofrows = Integer.parseInt(Data[0]);
+                if(Data.length == 2){
+                    int numofvars = Integer.parseInt(Data[0]);
+                    numofcolumns = numofvars + 1;
+                    numofrows = Integer.parseInt(Data[1]);
                 }else {
                     List<Double> lst = new ArrayList<>();
                     for (String datum : Data) {
@@ -41,7 +45,7 @@ public class Main {
                     list.add(lst);
                 }
             }
-            new Matrix(list, numofrows);
+            new Matrix(list, numofrows, numofcolumns);
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
@@ -51,8 +55,8 @@ public class Main {
     private static void exportfile(String filename){
         try {
             FileWriter myWriter = new FileWriter(filename);
-            double[] solution = Matrix.getMatrixSolution();
-
+            String[] solution = Matrix.getMatrixSolution();
+            //System.out.println(Arrays.toString(solution));
             for(int i = 0; i < solution.length; i++) {
                 myWriter.write(solution[i] + "\n");
             }

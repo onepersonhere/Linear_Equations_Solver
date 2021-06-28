@@ -7,7 +7,7 @@ public class LinearEquation {
     public static double[][] solveLinearEquation(double[][] matrix, int numofrows){
         //first part of algorithm
         for(int i = 0; i < numofrows; i++){
-            //System.out.println(Arrays.deepToString(matrix));
+            System.out.println(Arrays.deepToString(matrix));
             Row row = new Row();
             matrix = row.rowManipulation(matrix, i);
         }
