@@ -7,15 +7,21 @@ public class LinearEquation {
     public static double[][] solveLinearEquation(double[][] matrix, int numofrows){
         //first part of algorithm
         for(int i = 0; i < numofrows; i++){
-            System.out.println(Arrays.deepToString(matrix));
+            //System.out.println(Arrays.deepToString(matrix));
             Row row = new Row();
             matrix = row.rowManipulation(matrix, i);
         }
         //backSubstitution
-        for(int i = numofrows - 1; i > 0; i--){
-            //System.out.println(Arrays.deepToString(matrix));
-            matrix = backSub(matrix, i);
+        if(Matrix.str.equals("")) {
+            for (int i = numofrows - 1; i > 0; i--) {
+                //System.out.println(Arrays.deepToString(matrix));
+                matrix = backSub(matrix, i);
+            }
+            if(Row.columnSwaps.size() != 0){
+                matrix = Row.swapback(matrix);
+            }
         }
+        Matrix.checkSolutions(matrix);
         return matrix;
     }
 

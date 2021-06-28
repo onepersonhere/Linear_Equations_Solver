@@ -5,20 +5,22 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Row {
-    private List<int[]> columnSwaps = new ArrayList<>();
-    private int numofrows = Matrix.numofrows;
-    private int numofcolumns = Matrix.numofcolumns;
-    private double[][] matrix = Matrix.matrix;
+    public static List<int[]> columnSwaps = new ArrayList<>();
+    private static int numofrows = Matrix.numofrows;
+    private static int numofcolumns = Matrix.numofcolumns;
     public Row(){
         //a list to hold all column swaps
     }
 
     public double[][] rowManipulation(double[][] matrix, int i){
-        double[] row = matrix[i];
         matrix = checkCoefficient(matrix, i);
+        double[] row = matrix[i];
         //System.out.println(Arrays.toString(row));
-        row = simplify(row, i); //simplfies the row
-        matrix = rowEchelon(matrix, row, i);
+        if(Matrix.str.equals("")) {
+            row = simplify(row, i); //simplfies the row
+            matrix = rowEchelon(matrix, row, i);
+            //Matrix.checkSolutions(matrix);
+        }
         return matrix;
     }
 
@@ -45,26 +47,65 @@ public class Row {
         for(int a = i + 1; a < matrix.length; a++) {
             double[] nextrow = matrix[a];
             //System.out.println(Arrays.toString(nextrow));
-            double[] temprow = new double[row.length];
-            double coeff = -nextrow[i];
-            for (int n = 0; n < row.length; n++) {
-                temprow[n] = row[n] * coeff;
+            if(nextrow[i] != 0) {
+                double[] temprow = new double[row.length];
+                double coeff = -nextrow[i];
+                for (int n = 0; n < row.length; n++) {
+                    temprow[n] = row[n] * coeff;
+                }
+                for (int n = 0; n < row.length; n++) {
+                    nextrow[n] += temprow[n];
+                }
+                matrix[a] = nextrow;
+                //System.out.println(Arrays.toString(nextrow));
+                System.out.println(coeff + " * R" + (i + 1) + " + R" + (a + 1) + " -> R" + (a + 1));
             }
-            for (int n = 0; n < row.length; n++) {
-                nextrow[n] += temprow[n];
-            }
-            matrix[a] = nextrow;
-            System.out.println(coeff + " * R" + (i + 1) + " + R" + (a+1) + " -> R" + (a+1));
-
         }
         return matrix;
     }
     private double[][] checkCoefficient(double[][] matrix, int i){
-        double[] row = matrix[i];
-        boolean triedcolumn = false;
-        boolean triedrow = false;
-        boolean alltried = false;
+
         //row i, elem i != 0 else swap
+        matrix = swaprow(matrix, i);
+        //if down row, all = 0, swap with next right column (entire column is swapped)
+        matrix = swapcol(matrix, i);
+        //if down row 0, right column = 0, find first non-zero elem in bottom, swap
+        if(matrix[i][i] == 0){
+            double[][] tempmatrix = matrix;
+            int a = i;
+            int b = i;
+            for(; a < numofrows; a++){
+                for(; b < numofcolumns; b++){
+                    if(matrix[a][b] != 0){
+                        break;
+                    }
+                }
+            }
+            if(a != numofrows){
+                //swaprow
+                matrix[i] = matrix[a];
+                matrix[a] = tempmatrix[i];
+                System.out.println("R" + (i + 1) + " <-> R" + (a + 1));
+                //swapcol
+                for(int c = 0; c < numofrows; c++) {
+                    matrix[c][i] = matrix[c][b];
+                    matrix[c][b] = tempmatrix[c][i];
+                }
+                columnSwaps.add(new int[]{i,b});
+                System.out.println("C" + (i + 1) + " <-> C" + (b + 1));
+            }else{
+                Matrix.checkSolutions(matrix);
+            }
+        }
+
+        //column swaps must swap back in the end
+        //if no such element, end first part of algo -> Matrix.checkSolutions();
+        //proceed if returned ""
+
+        return matrix;
+    }
+    private double[][] swaprow(double[][] matrix, int i){
+        double[] row = matrix[i];
         if(matrix[i][i] == 0){
             int x = i;
             for(; x < numofrows; x++){
@@ -77,12 +118,14 @@ public class Row {
                 matrix[i] = matrix[x];
                 matrix[x] = row;
                 System.out.println("R" + (i + 1) + " <-> R" + (x + 1));
-            }else{
-                triedrow = true;
+                //System.out.println(Arrays.deepToString(matrix));
             }
         }
-        //if down row, all = 0, swap with next right column (entire column is swapped)
-        if(triedrow){
+
+        return matrix;
+    }
+    private double[][] swapcol(double[][] matrix, int i){
+        if(matrix[i][i] == 0){
             double[][] tempmatrix = matrix;
             int x = i;
             for(; x < numofcolumns - 1; x++){
@@ -98,20 +141,22 @@ public class Row {
                 }
                 columnSwaps.add(new int[]{i,x});
                 System.out.println("C" + (i + 1) + " <-> C" + (x + 1));
-            }else{
-                triedcolumn = true;
             }
         }
-        //if down row 0, right column = 0, find first non-zero elem in bottom, swap
-        if(triedcolumn){
-
-        }
-
-        //column swaps must swap back in the end
-        //if no such element, end first part of algo -> Matrix.checkSolutions();
-        //proceed if returned ""
-
         return matrix;
     }
 
+    public static double[][] swapback(double[][] matrix){
+        double[][] tempmatrix = matrix;
+        for(int i = 0; i < columnSwaps.size(); i++) {
+            int x = columnSwaps.get(i)[0];
+            int y = columnSwaps.get(i)[1];
+            for(int a = 0; a < numofrows; a++) {
+                matrix[a][y] = matrix[a][x];
+                matrix[a][x] = tempmatrix[a][y];
+                System.out.println("C" + (y + 1) + " <-> C" + (x + 1));
+            }
+        }
+        return matrix;
+    }
 }
