@@ -12,9 +12,9 @@ public class Row {
         //a list to hold all column swaps
     }
 
-    public double[][] rowManipulation(double[][] matrix, int i){
+    public Complex[][] rowManipulation(Complex[][] matrix, int i){
         matrix = checkCoefficient(matrix, i);
-        double[] row = matrix[i];
+        Complex[] row = matrix[i];
         //System.out.println(Arrays.toString(row));
         if(Matrix.str.equals("")) {
             row = simplify(row, i); //simplfies the row
@@ -24,37 +24,42 @@ public class Row {
         return matrix;
     }
 
-    private double[] rowMultiplication(double[] row, double coeff){
+    private Complex[] rowDivision(Complex[] row, Complex coeff){
         for(int i = 0; i < row.length; i++){
-            if(row[i] != 0) {
-                row[i] *= coeff;
+            if(!Complex.Compare(row[i], 0)) {
+                //System.out.println(row[i] + " " + coeff);
+                row[i] = Complex.division(row[i], coeff);
             }
         }
         return row;
     }
 
-    private double[] simplify(double[] row, int i){
-        if(row[i] != 1 && row[i] != 0){
-            double coeff = 1/row[i];
-            row = rowMultiplication(row, coeff);
-            System.out.println(coeff + " * R" + (i+1) + " -> R" + (i+1));
+    private Complex[] simplify(Complex[] row, int i){
+        if(!Complex.Compare(row[i], 1) && !Complex.Compare(row[i], 0)){
+            Complex coeff = row[i];
+            row = rowDivision(row, coeff);
+            System.out.println("R" + (i+1) + " / " + coeff + " -> R" + (i+1));
         }
         return row;
     }
 
-    private double[][] rowEchelon(double[][] matrix, double[] row, int i){
+    private Complex[][] rowEchelon(Complex[][] matrix, Complex[] row, int i){
 
         for(int a = i + 1; a < matrix.length; a++) {
-            double[] nextrow = matrix[a];
+            Complex[] nextrow = matrix[a];
             //System.out.println(Arrays.toString(nextrow));
-            if(nextrow[i] != 0) {
-                double[] temprow = new double[row.length];
-                double coeff = -nextrow[i];
+            if(!Complex.Compare(nextrow[i], 0)) {
+                Complex[] temprow = new Complex[row.length];
+                Complex coeff = Complex.Multiplication(-1, nextrow[i]);
+                //System.out.println(-1 + " " + nextrow[i]);
+                //System.out.println(Arrays.toString(coeff.getComplex()));
                 for (int n = 0; n < row.length; n++) {
-                    temprow[n] = row[n] * coeff;
+                    temprow[n] = Complex.Multiplication(row[n], coeff);
                 }
                 for (int n = 0; n < row.length; n++) {
-                    nextrow[n] += temprow[n];
+                    //System.out.println("For " + n + " place in row: " + nextrow[n] + " + " + temprow[n]);
+                    nextrow[n] = Complex.Addition(nextrow[n], temprow[n]);
+                    //System.out.println(Arrays.toString(nextrow));
                 }
                 matrix[a] = nextrow;
                 //System.out.println(Arrays.toString(nextrow));
@@ -63,20 +68,20 @@ public class Row {
         }
         return matrix;
     }
-    private double[][] checkCoefficient(double[][] matrix, int i){
+    private Complex[][] checkCoefficient(Complex[][] matrix, int i){
 
         //row i, elem i != 0 else swap
         matrix = swaprow(matrix, i);
         //if down row, all = 0, swap with next right column (entire column is swapped)
         matrix = swapcol(matrix, i);
         //if down row 0, right column = 0, find first non-zero elem in bottom, swap
-        if(matrix[i][i] == 0){
-            double[][] tempmatrix = matrix;
+        if(Complex.Compare(matrix[i][i], 0)){
+            Complex[][] tempmatrix = matrix;
             int a = i;
             int b = i;
             for(; a < numofrows; a++){
                 for(; b < numofcolumns; b++){
-                    if(matrix[a][b] != 0){
+                    if(!Complex.Compare(matrix[a][b], 0)){
                         break;
                     }
                 }
@@ -93,6 +98,7 @@ public class Row {
                 }
                 columnSwaps.add(new int[]{i,b});
                 System.out.println("C" + (i + 1) + " <-> C" + (b + 1));
+                LinearEquation.printarr(matrix);
             }else{
                 Matrix.checkSolutions(matrix);
             }
@@ -104,15 +110,17 @@ public class Row {
 
         return matrix;
     }
-    private double[][] swaprow(double[][] matrix, int i){
-        double[] row = matrix[i];
-        if(matrix[i][i] == 0){
+    private Complex[][] swaprow(Complex[][] matrix, int i){
+        Complex[] row = matrix[i];
+        if(Complex.Compare(matrix[i][i], 0)){
             int x = i;
             for(; x < numofrows; x++){
-                if(matrix[x][i] != 0){
+                if(!Complex.Compare(matrix[x][i], 0)){ //first that is not 0
+                    //System.out.println(matrix[x][i].real + " broke");
                     break;
                 }
             }
+            //System.out.println(x + " " + numofrows);
             //swap
             if(x != numofrows) {
                 matrix[i] = matrix[x];
@@ -121,15 +129,15 @@ public class Row {
                 //System.out.println(Arrays.deepToString(matrix));
             }
         }
-
+        //LinearEquation.printarr(matrix);
         return matrix;
     }
-    private double[][] swapcol(double[][] matrix, int i){
-        if(matrix[i][i] == 0){
-            double[][] tempmatrix = matrix;
+    private Complex[][] swapcol(Complex[][] matrix, int i){
+        if(Complex.Compare(matrix[i][i], 0)){
+            Complex[][] tempmatrix = matrix;
             int x = i;
             for(; x < numofcolumns - 1; x++){
-                if(matrix[i][x] != 0){
+                if(!Complex.Compare(matrix[i][x], 0)){
                     break;
                 }
             }
@@ -143,11 +151,12 @@ public class Row {
                 System.out.println("C" + (i + 1) + " <-> C" + (x + 1));
             }
         }
+        //LinearEquation.printarr(matrix);
         return matrix;
     }
 
-    public static double[][] swapback(double[][] matrix){
-        double[][] tempmatrix = matrix;
+    public static Complex[][] swapback(Complex[][] matrix){
+        Complex[][] tempmatrix = matrix;
         for(int i = 0; i < columnSwaps.size(); i++) {
             int x = columnSwaps.get(i)[0];
             int y = columnSwaps.get(i)[1];
@@ -157,6 +166,7 @@ public class Row {
                 System.out.println("C" + (y + 1) + " <-> C" + (x + 1));
             }
         }
+        //LinearEquation.printarr(matrix);
         return matrix;
     }
 }

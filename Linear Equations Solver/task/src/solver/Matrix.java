@@ -7,26 +7,22 @@ import java.util.List;
 import static java.lang.Math.round;
 
 public class Matrix {
-    public static double[][] matrix;
+    public static Complex[][] matrix;
     public static int numofrows;
     public static int numofcolumns;
     public static String str = "";
-    Matrix(List<List<Double>> list, int numofrows, int numofcolumns){
+    Matrix(List<List<String>> list, int numofrows, int numofcolumns){
         Matrix.numofrows = numofrows;
         Matrix.numofcolumns = numofcolumns;
-        matrix = new double[numofrows][numofcolumns];
+        matrix = new Complex[numofrows][numofcolumns];
         formMatrix(list);
-
-        //checkSolutions(matrix);
-        //if(str.equals("")) {
-            calculations();
-        //}
+        calculations();
         //System.out.println(Arrays.deepToString(matrix));
     }
-    private void formMatrix(List<List<Double>> list){
+    private void formMatrix(List<List<String>> list){
         for(int i = 0; i < numofrows; i++){
             for (int j = 0; j < numofcolumns; j++){
-                matrix[i][j] = list.get(i).get(j);
+                matrix[i][j] = new Complex(list.get(i).get(j));
             }
         }
     }
@@ -34,11 +30,11 @@ public class Matrix {
         System.out.println("Start solving the equation");
         matrix = LinearEquation.solveLinearEquation(matrix, numofrows);
     }
-    private static double[] MatrixSoln(){
-        double[] solution = new double[numofcolumns - 1];
+    private static Complex[] MatrixSoln(){
+        Complex[] solution = new Complex[numofcolumns - 1];
         for(int i = 0; i < numofrows; i++){
             for(int j = 0; j < numofcolumns -1; j++){
-                if(round(matrix[i][j]) == 1){
+                if(Complex.roundCompare(matrix[i][j], 1)){
                     solution[j] = matrix[i][numofcolumns - 1];
                 }
             }
@@ -48,16 +44,12 @@ public class Matrix {
     }
     public static String[] getMatrixSolution() {
         if(str.equals("")){
-            return Arrays.stream(MatrixSoln()).mapToObj(String::valueOf).toArray(String[]::new);
+            return Arrays.stream(MatrixSoln()).map(Complex::toString).toArray(String[]::new);
         }
         return new String[]{str};
     }
 
-    public void setMatrix(double[][] matrix) {
-        Matrix.matrix = matrix;
-    }
-
-    public static void checkSolutions(double[][] matrix){
+    public static void checkSolutions(Complex[][] matrix){
         //check if No solns or Infinite
         //amount of variables & amt of equations don't need to be equal
         //significant eqns = non zero rows in linear system
@@ -70,33 +62,32 @@ public class Matrix {
         //(infinite number of solutions.)
 
         int numofsigeqns = 0;
-        double[] zeroarr = new double[numofcolumns];
-        Arrays.fill(zeroarr, 0);
         for(int i = 0; i < numofrows; i++){
-            //System.out.println(Arrays.equals(matrix[i], zeroarr));
-            if(!Arrays.equals(matrix[i], zeroarr)){
+            int numofzeroes = 0;
+            for(int j = 0; j < numofcolumns; j++){
+                if(Complex.Compare(matrix[i][j], 0)){
+                    numofzeroes++;
+                }
+            }
+            if(numofzeroes != numofcolumns){
                 numofsigeqns++;
             }
         }
-
+        //System.out.println(numofsigeqns);
         if(numofsigeqns < numofcolumns - 1){
-            System.out.println(numofsigeqns);
+            //System.out.println(numofsigeqns);
             System.out.println("Infinitely many solutions");
             str = "Infinitely many solutions";
         }
 
-        //if(numofrows < numofcolumns - 1){
-        //    System.out.println("No solutions");
-        //    str = "No solutions";
-        //}
-        for(double[] rows : matrix){
+        for(Complex[] rows : matrix){
             int numofzeroes = 0;
             for(int i = 0; i < rows.length; i++){
-                if(rows[i] == 0){
+                if(Complex.Compare(rows[i], 0)){
                     numofzeroes++;
                 }
             }
-            if(numofzeroes == rows.length - 1 && rows[rows.length - 1] != 0){
+            if(numofzeroes == rows.length - 1 && !Complex.Compare(rows[rows.length - 1], 0)){
                 System.out.println("No solutions");
                 str = "No solutions";
                 break;
